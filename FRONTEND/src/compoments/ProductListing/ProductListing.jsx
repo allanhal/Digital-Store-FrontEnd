@@ -1,9 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './ProductListing.css';
 import Card from "../../compoments/ProductCard/ProductCard.jsx";
 import { produto } from '../../../json/Product';
+import axios from 'axios'
 
 export default function ProductListing({ quantidade = 12, ordenacao = 'Mais relevantes', searchQuery = '', filtros = {} }) {
+
+  const [produtos, setProdutos] = useState([])
+
+  useEffect(() => {
+    const executarRequest = async () => {
+      const resultadoDaRequest = await axios('https://api-store-xgoc.onrender.com/api/products')
+      setProdutos(resultadoDaRequest.data)
+    }
+
+    executarRequest();
+  }, [])
+
   if (!produto || !Array.isArray(produto)) {
     return <p>Produtos não disponíveis.</p>;
   }
@@ -44,12 +57,12 @@ export default function ProductListing({ quantidade = 12, ordenacao = 'Mais rele
     Estado: filtros.Estado || [],
   };
 
-  
+
   const normalizeString = (str) => {
     return str
-      .normalize('NFD') 
-      .replace(/[\u0300-\u036f]/g, '') 
-      .toLowerCase(); 
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   };
 
   const produtosFiltrados = produto.filter((item) => {
@@ -74,10 +87,17 @@ export default function ProductListing({ quantidade = 12, ordenacao = 'Mais rele
   const produtosExibidos = produtosOrdenados.slice(0, quantidade);
 
   return (
-    <div className="row container mx-auto justify-content-center">
-      {produtosExibidos.map((item) => (
-        <Card key={item.id} produto={{...item}} />
-      ))}
-    </div>
+    <>
+      {produtos.map(produto => <div>
+        <div>{produto.name}</div>
+        <div>{produto.price}</div>
+        <br />
+      </div>)}
+      <div className="row container mx-auto justify-content-center">
+        {produtosExibidos.map((item) => (
+          <Card key={item.id} produto={{ ...item }} />
+        ))}
+      </div>
+    </>
   );
 }
